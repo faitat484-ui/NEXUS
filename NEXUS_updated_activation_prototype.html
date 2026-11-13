@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#02060b">
+<title>NEXUS</title>
+<style>
+:root{--cyan:#55e6ff;--blue:#168cff;--muted:#8ba4b7;--panel:#091521;--line:#153348}
+*{box-sizing:border-box}body{margin:0;background:#02060b;color:#eaf8ff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;overflow-x:hidden}
+button,input{font:inherit}button{border:1px solid #24516a;background:#0b1b29;color:#eaf8ff;padding:12px 16px;border-radius:12px;cursor:pointer}button.primary{background:linear-gradient(120deg,#087da6,#1355a1);border-color:#55dfff}button:disabled{opacity:.45;cursor:not-allowed}
+#standby{position:fixed;top:12px;left:12px;width:12px;height:12px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);z-index:10;cursor:pointer}
+main{max-width:760px;margin:auto;padding:44px 18px 50px}
+header{text-align:center;margin:8px 0 24px}h1{font-size:30px;letter-spacing:.28em;margin:0;color:#dffaff}header p{font-size:11px;letter-spacing:.2em;color:var(--muted);margin:7px 0}
+.core{height:175px;display:grid;place-items:center;margin:12px auto 22px;position:relative}.ring{position:absolute;border:1px solid #138dc5;border-radius:50%;box-shadow:0 0 22px #0875aa55,inset 0 0 18px #0875aa33}.r1{width:118px;height:118px;animation:spin 12s linear infinite}.r2{width:150px;height:150px;border-color:#1c4d8c;animation:spin 18s linear infinite reverse}.r3{width:88px;height:88px;border-color:#63eaff;box-shadow:0 0 24px #38dfff88;animation:pulse 2.5s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.09);opacity:.55}}
+#status{text-align:center;color:var(--cyan);font-size:12px;letter-spacing:.15em;min-height:20px}
+.panel{background:linear-gradient(145deg,#091521,#050c13);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 12px 35px #0008}
+h2{font-size:16px;margin:0 0 10px}p{color:#a8bdcb;line-height:1.5;font-size:14px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.small{font-size:11px;color:var(--muted)}.hidden{display:none!important}
+.sample{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #142b3a}.sample:last-child{border:0}.tag{font-size:11px;color:#8caaba;border:1px solid #254254;padding:4px 8px;border-radius:20px}
+input{width:100%;background:#06101a;color:white;border:1px solid #214357;border-radius:10px;padding:12px;margin:8px 0}
+#log{white-space:pre-wrap;min-height:42px;color:#a7c5d5;font-size:13px}
+footer{text-align:center;color:#627b8d;font-size:11px;margin-top:20px}
+</style>
+</head>
+<body>
+<div id="standby" title="Show or hide NEXUS"></div>
+<main>
+<header><h1>NEXUS</h1><p>EXECUTIVE INTELLIGENCE</p></header>
+<div class="core" id="core"><div class="ring r2"></div><div class="ring r1"></div><div class="ring r3"></div></div>
+<div id="status">SYSTEM STANDBY</div>
+<section class="panel" id="welcome">
+<h2>Initial activation</h2>
+<p>Set up microphone access and record three voice samples. This browser prototype can capture test samples, but it cannot create or verify a secure speaker voiceprint. Online commands will remain locked until the native authentication engine is installed.</p>
+<button class="primary" id="startSetup">Begin setup</button>
+</section>
+<section class="panel hidden" id="setup">
+<h2>1. Microphone permission</h2><p>Allow microphone access when Android asks. Record in a quiet room, speaking naturally.</p>
+<button class="primary" id="permission">Request microphone access</button>
+<div id="permissionState" class="small">Microphone permission not yet granted.</div>
+<div style="height:10px"></div>
+<h2>2. Voice samples</h2>
+<p>For each sample, say: “NEXUS, this is my voice registration sample.” Each short recording is used only during this session and is discarded when you leave this page.</p>
+<div class="sample"><span>Voice sample 1</span><span class="tag" id="s1">Pending</span><button id="rec1" disabled>Record</button></div>
+<div class="sample"><span>Voice sample 2</span><span class="tag" id="s2">Pending</span><button id="rec2" disabled>Record</button></div>
+<div class="sample"><span>Voice sample 3</span><span class="tag" id="s3">Pending</span><button id="rec3" disabled>Record</button></div>
+<div class="small" id="recordState">No samples recorded.</div>
+<div style="height:12px"></div>
+<button id="finish" disabled>Finish test setup</button>
+</section>
+<section class="panel hidden" id="home">
+<h2>System controls</h2>
+<p>Choose a mode. Online mode is deliberately locked because this prototype has no real voiceprint verifier. Offline mode requires the TIGER safe word before accepting a test command.</p>
+<div class="row"><button id="online">Online mode</button><button id="offline" class="primary">Offline mode</button></div>
+<div id="offlineBox" class="hidden">
+<label for="safe">Offline authorisation word</label><input id="safe" type="password" autocomplete="off" placeholder="Enter safe word">
+<button id="authorise" class="primary">Authorise offline session</button>
+</div>
+<div id="log">Waiting for mode selection.</div>
+</section>
+<section class="panel hidden" id="commands">
+<h2>NEXUS is ready for offline test commands</h2>
+<p>Try “time”, “date”, “notes”, or “call [contact name]”. Phone actions open the dialler only; they do not place a call automatically.</p>
+<div class="row"><button id="time">Time</button><button id="date">Date</button><button id="notes">Notes</button></div>
+<div id="commandLog"></div>
+</section>
+<footer>Prototype build · Native voice identity verification is not yet installed</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let stream=null, recorder=null, active=false, count=0, authorised=false, lockTimer=null, noteText='';
+function show(id){$(id).classList.remove('hidden')}
+function hide(id){$(id).classList.add('hidden')}
+function activity(){clearTimeout(lockTimer);if(authorised)lockTimer=setTimeout(lock,15000)}
+function lock(){authorised=false;hide('commands');hide('offlineBox');$('safe').value='';$('status').textContent='SESSION LOCKED';$('log').textContent='Offline session locked after inactivity.'}
+$('standby').onclick=()=>{ $('welcome').classList.toggle('hidden'); $('setup').classList.add('hidden'); $('home').classList.add('hidden'); $('commands').classList.add('hidden'); $('status').textContent='SYSTEM STANDBY';};
+$('startSetup').onclick=()=>{hide('welcome');show('setup');$('status').textContent='INITIAL CONFIGURATION'};
+$('permission').onclick=async()=>{
+ try{stream=await navigator.mediaDevices.getUserMedia({audio:true});$('permissionState').textContent='Microphone permission granted for this session.';['rec1','rec2','rec3'].forEach(x=>$(x).disabled=false);$('status').textContent='MICROPHONE READY'}
+ catch(e){$('permissionState').textContent='Microphone access was not granted. Check Chrome site permissions and try again.'}
+};
+async function recordSample(n){
+ if(!stream)return;
+ const btn=$('rec'+n);btn.disabled=true;let chunks=[];
+ try{
+  recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  recorder.onstop=()=>{chunks=[];count++;$('s'+n).textContent='Captured (session only)';$('recordState').textContent=count+' of 3 test samples captured. Audio is discarded, not enrolled as a voiceprint.';$('finish').disabled=count!==3;btn.disabled=false;};
+  recorder.start();$('status').textContent='RECORDING SAMPLE '+n;
+  setTimeout(()=>{if(recorder&&recorder.state==='recording')recorder.stop();$('status').textContent='SAMPLE '+n+' CAPTURED';},3500);
+ }catch(e){btn.disabled=false;$('recordState').textContent='Recording failed. Try again.'}
+}
+[1,2,3].forEach(n=>$('rec'+n).onclick=()=>recordSample(n));
+$('finish').onclick=()=>{hide('setup');show('home');$('status').textContent='SETUP PREVIEW COMPLETE';$('log').textContent='Three test recordings captured. A secure voiceprint has NOT been created. Online mode remains locked.';};
+$('online').onclick=()=>{$('log').textContent='ONLINE MODE LOCKED: native speaker verification and anti-spoofing are not installed yet.';$('status').textContent='ONLINE AUTHENTICATION UNAVAILABLE'};
+$('offline').onclick=()=>{show('offlineBox');$('log').textContent='Enter TIGER to authorise this offline prototype.'};
+$('authorise').onclick=()=>{if($('safe').value.trim().toUpperCase()==='TIGER'){authorised=true;show('commands');$('status').textContent='OFFLINE SESSION AUTHORISED';$('log').textContent='Offline test session active. It will lock after 15 seconds of inactivity.';activity()}else{$('log').textContent='Authorisation not accepted.'}};
+$('time').onclick=()=>{activity();$('commandLog').textContent='Local time: '+new Date().toLocaleTimeString()};
+$('date').onclick=()=>{activity();$('commandLog').textContent='Date: '+new Date().toLocaleDateString()};
+$('notes').onclick=()=>{activity();let v=prompt('Enter a note');if(v){noteText+=v+'\n';$('commandLog').textContent='Note added for this session.'}};
+document.addEventListener('click',e=>{if(authorised&&!['authorise','offline','online'].includes(e.target.id))activity()});
+document.addEventListener('keydown',activity);
+</script>
+</body></html>
